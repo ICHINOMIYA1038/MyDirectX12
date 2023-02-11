@@ -15,6 +15,7 @@
 #include<iostream>
 #endif
 #include <vector>
+#include"Model.h"
 using namespace std;
 using namespace DirectX;
 
@@ -318,7 +319,7 @@ int Paint() {
 	/// 6.描画命令
 	
 	
-	
+	/*
 	vertices[0] = { -0.4f,-0.7f,0.0f };//左下
 	vertices[1] = { -0.4f,0.7f,0.0f };//左上
 	vertices[2] = { 0.4f,-0.7f,0.0f };//右下
@@ -328,6 +329,8 @@ int Paint() {
 		0,1,2,
 		2,1,3
 	};
+
+	
 
 	/// <summary>
 	/// GPU上に生成するバッファ
@@ -349,8 +352,15 @@ int Paint() {
 	resdesc.SampleDesc.Count = 1;
 	resdesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 	resdesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	
+	*/
 
+	XMFLOAT3 vertArray[4] = { { -0.4f,-0.7f,0.0f } ,{ -0.4f,0.7f,0.0f } ,{0.4f,-0.7f,0.0f} ,{0.4f,0.7f,0.0f } };
+	Model model = Model(_dev, vertArray);
+	XMFLOAT3 vertArray2[4] = {{ -1.0f,-0.5f,0.0f } ,{ -1.0f,-0.8f,0.0f } ,{-0.8f,-0.5f,0.0f} ,{-0.8f,-0.8f,0.0f }};
+	Model model2 = Model(_dev, vertArray2);
 
+	/*
 	//******頂点バッファの作成*************
 	ID3D12Resource* vertBuff = nullptr;
 	
@@ -374,10 +384,12 @@ int Paint() {
 	//1頂点あたりのバイト数
 	vbView.StrideInBytes = sizeof(vertices[0]);
 	//頂点バッファビューをGPUに伝えてあげる処理
-	_cmdList->IASetVertexBuffers(0, 1, &vbView);
+	
 
-	//*****************************************//
+	//****************************************
+	
 
+	
 	//******インデックスバッファの作成*************
 	ID3D12Resource* idxBuff = nullptr;
 
@@ -398,7 +410,7 @@ int Paint() {
 	ibView.SizeInBytes = sizeof(indices);
 
 
-	//*****************************************//
+	//*****************************************/
 
 	///スワップチェーンが機能していたら、0か1のどちらかが帰ってくる。
 	auto bbIdx = _swapchain->GetCurrentBackBufferIndex();
@@ -433,8 +445,10 @@ int Paint() {
 	_cmdList->RSSetScissorRects(1, &scissorrect);
 
 	_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-
+	
+	model2.draw(_cmdList);
+	model.draw(_cmdList);
+	
 	//頂点バッファのセット
 	//第一引数にはスロット番号
 	//第二引数には頂点バッファービューの数を
@@ -448,9 +462,9 @@ int Paint() {
 	//第三引数には頂点データのオフセット
 	//第四引数には、インスタンスのオフセット
 	//_cmdList->DrawInstanced(3, 1, 0, 0);
-
-	_cmdList->IASetIndexBuffer(&ibView);
-	_cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	//_cmdList->IASetVertexBuffers(0, 1, &vbView);
+	//_cmdList->IASetIndexBuffer(&ibView);
+	//_cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 	BarrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	BarrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

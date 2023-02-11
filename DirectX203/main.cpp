@@ -569,7 +569,30 @@ int readShader() {
 		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,//インスタンシング関連
 		0//一度に描画するインスタンスの数
 	},
+		{
+		"TEXCOORD", //セマンティック
+		0,//同じセマンティックが存在するときのインデックス
+		DXGI_FORMAT_R32G32B32_FLOAT,//Format
+		0,D3D12_APPEND_ALIGNED_ELEMENT,//入力スロットインデックス
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,//インスタンシング関連
+		0//一度に描画するインスタンスの数
+	},
 	};
+
+	
+	struct TexRGBA
+	{
+		unsigned char R, G, B, A;
+	};
+	std::vector<TexRGBA>texturedata(256 * 256);
+	
+	for (auto& rgba : texturedata)
+	{
+		rgba.R = rand() % 256;
+		rgba.G = rand() % 256;
+		rgba.B = rand() % 256;
+		rgba.A = 255;
+	}
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline = {};
 	gpipeline.pRootSignature = nullptr;

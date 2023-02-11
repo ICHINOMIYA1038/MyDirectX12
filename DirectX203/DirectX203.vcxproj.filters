@@ -25,6 +25,7 @@
   <ItemGroup>
     <FxCompile Include="BasicVertexShader.hlsl" />
     <FxCompile Include="BasicPixelShader.hlsl" />
+    <FxCompile Include="BasicShaderHeader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">

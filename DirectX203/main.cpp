@@ -306,7 +306,7 @@ int CreateRenderTarget() {
 	return 0;
 }
 
-XMFLOAT3 vertices[3];
+XMFLOAT3 vertices[4];
 ///スワップチェーンの動作
 int Paint() {
 	///流れ
@@ -320,8 +320,9 @@ int Paint() {
 	
 	
 	vertices[0] = { -0.4f,-0.7f,0.0f };//左下
-	vertices[1] = { 0.4f,0.7f,0.0f };//左上
-	vertices[2] = { 1.0f,-1.0f,0.0f };//右下
+	vertices[1] = { -0.4f,0.7f,0.0f };//左上
+	vertices[2] = { 0.4f,-0.7f,0.0f };//右下
+	vertices[3] = { 0.4f,0.7f,0.0f };//右下
 
 	unsigned short indices[] = {
 		0,1,2,
@@ -378,29 +379,24 @@ int Paint() {
 	//*****************************************//
 
 	//******インデックスバッファの作成*************
-	ID3D12Resource* vertBuff = nullptr;
+	ID3D12Resource* idxBuff = nullptr;
 
 	//実際に、バッファをGPU上に生成する関数
-	result = _dev->CreateCommittedResource(&heapprop, D3D12_HEAP_FLAG_NONE, &resdesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertBuff));
+	result = _dev->CreateCommittedResource(&heapprop, D3D12_HEAP_FLAG_NONE, &resdesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&idxBuff));
 	if (result != S_OK) {
 		return -1;
 	}
 
-	///頂点の座標
-	XMFLOAT3* vertMap = nullptr;
-	//生成したバッファをCPU側のvertMapに結び付ける。
-	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
-	std::copy(std::begin(vertices), std::end(vertices), vertMap);
-	vertBuff->Unmap(0, nullptr);
+	unsigned short* mappedIdx = nullptr;
+	idxBuff->Map(0, nullptr, (void**)&mappedIdx);
+	std::copy(std::begin(indices), std::end(indices), mappedIdx);
+	idxBuff->Unmap(0, nullptr);
 
-	//バッファのGPU上でのアドレスを取得
-	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
-	//全バイト数
-	vbView.SizeInBytes = sizeof(vertices);
-	//1頂点あたりのバイト数
-	vbView.StrideInBytes = sizeof(vertices[0]);
-	//頂点バッファビューをGPUに伝えてあげる処理
-	_cmdList->IASetVertexBuffers(0, 1, &vbView);
+	D3D12_INDEX_BUFFER_VIEW ibView = {};
+	ibView.BufferLocation = idxBuff->GetGPUVirtualAddress();
+	ibView.Format = DXGI_FORMAT_R16_UINT;
+	ibView.SizeInBytes = sizeof(indices);
+
 
 	//*****************************************//
 
@@ -444,14 +440,17 @@ int Paint() {
 	//第二引数には頂点バッファービューの数を
 	//第三引数には、頂点バッファビューの配列をセットします。
 
-	_cmdList->IASetVertexBuffers(0, 1, &vbView);
+	//_cmdList->IASetVertexBuffers(0, 1, &vbView);
 
 	//描画命令の設定
 	//第一引数には、頂点数
 	//第二引数にはインスタンス数
 	//第三引数には頂点データのオフセット
 	//第四引数には、インスタンスのオフセット
-	_cmdList->DrawInstanced(3, 1, 0, 0);
+	//_cmdList->DrawInstanced(3, 1, 0, 0);
+
+	_cmdList->IASetIndexBuffer(&ibView);
+	_cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 	BarrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	BarrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

@@ -4,6 +4,7 @@
 #include<dxgi1_6.h>
 #include<DirectXMath.h>
 #include<d3dcompiler.h>
+#include"util.h"
 
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"d3d12.lib")
@@ -356,9 +357,20 @@ int Paint() {
 	*/
 
 	XMFLOAT3 vertArray[4] = { { -0.4f,-0.7f,0.0f } ,{ -0.4f,0.7f,0.0f } ,{0.4f,-0.7f,0.0f} ,{0.4f,0.7f,0.0f } };
+	
+	Vertex vertices[]=
+	{
+		{{-0.4f,-0.7f,0.0f},{0.0f,1.0f}},
+		{{-0.4f,0.7f,0.0f},{0.0f,0.0f}},
+		{{0.4f,-0.7f,0.0f},{1.0f,1.0f}},
+		{{0.4f,0.7f,0.0f}, {1.0f,0.0f}},
+	};
+	
 	Model model = Model(_dev, vertArray);
-	XMFLOAT3 vertArray2[4] = {{ -1.0f,-0.5f,0.0f } ,{ -1.0f,-0.8f,0.0f } ,{-0.8f,-0.5f,0.0f} ,{-0.8f,-0.8f,0.0f }};
-	Model model2 = Model(_dev, vertArray2);
+	model.setVertex(vertices);
+	//model.setRootSignature(rootsignature);
+	//XMFLOAT3 vertArray2[4] = {{ -1.0f,-0.5f,0.0f } ,{ -1.0f,-0.8f,0.0f } ,{-0.8f,-0.5f,0.0f} ,{-0.8f,-0.8f,0.0f }};
+	//Model model2 = Model(_dev, vertArray2);
 
 	/*
 	//******頂点バッファの作成*************
@@ -440,13 +452,13 @@ int Paint() {
 	_cmdList->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
 	
 	_cmdList->SetPipelineState(_pipelinestate);
+
 	_cmdList->SetGraphicsRootSignature(rootsignature);
 	_cmdList->RSSetViewports(1, &viewport);
 	_cmdList->RSSetScissorRects(1, &scissorrect);
 
 	_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	
-	model2.draw(_cmdList);
+
 	model.draw(_cmdList);
 	
 	//頂点バッファのセット
@@ -580,19 +592,7 @@ int readShader() {
 	};
 
 	
-	struct TexRGBA
-	{
-		unsigned char R, G, B, A;
-	};
-	std::vector<TexRGBA>texturedata(256 * 256);
 	
-	for (auto& rgba : texturedata)
-	{
-		rgba.R = rand() % 256;
-		rgba.G = rand() % 256;
-		rgba.B = rand() % 256;
-		rgba.A = 255;
-	}
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline = {};
 	gpipeline.pRootSignature = nullptr;
@@ -660,6 +660,10 @@ int readShader() {
 	gpipeline.pRootSignature = rootsignature;
 
 	result = _dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&_pipelinestate));
+	if (result != S_OK)
+	{
+		//exit(-1);
+	}
 
 
 	///ビューポート
